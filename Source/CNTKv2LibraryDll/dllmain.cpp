@@ -12,6 +12,8 @@
 #include "Windows.h"
 #endif
 
+#include <cstdlib>
+
 BOOL APIENTRY DllMain(HMODULE /*hModule*/,
                       DWORD ul_reason_for_call,
                       LPVOID /*lpReserved*/
@@ -20,6 +22,16 @@ BOOL APIENTRY DllMain(HMODULE /*hModule*/,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+#if _DEBUG
+        // Disabling assertions in test environment.
+        // These functions should not lock anything, no deadlock expected.
+        if (std::getenv("V2_LIB_TESTING"))
+        {
+            _set_error_mode(_OUT_TO_STDERR);
+            _set_abort_behavior(0, _WRITE_ABORT_MSG);
+        }
+        break;
+#endif
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
